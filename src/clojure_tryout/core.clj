@@ -40,10 +40,6 @@
 (defn fizzbuzz2 [s]
   (map fizzbuzz-number2 s))
 
-(fizzbuzz (range 1 31))
-(fizzbuzz2 (range 1 31))
-
-
 (defn happy [n]
   (loop [snc (map #(Character/digit % 10) (str n))
          sum-snc 0]
