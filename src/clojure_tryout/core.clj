@@ -1,5 +1,6 @@
 (ns clojure-tryout.core
-  (:require [clojure.core.async :refer [go <! >! chan timeout]])
+  (:require [clojure-tryout.core :refer [fizzbuzz-number-naive-impl]]
+            [clojure.core.async :refer [<! >! chan go timeout]])
   (:gen-class))
 
 ;; It does this by getting the modulus of 15 then using this as the index for a
@@ -300,9 +301,6 @@
   `(binding [*current-implementation* ~impl]
      ~@body))
 
-
-
-
 (defn emit-bash-form [a]
   "Returns a String containing the equivalent Bash script to its argument"
   (cond
@@ -313,3 +311,6 @@
     (= (class a) java.lang.Long) (str a)
     (= (class a) java.lang.Double) (str a)
     :else (throw (Exception. "Fell through"))))
+
+
+
