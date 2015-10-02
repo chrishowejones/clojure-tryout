@@ -1,6 +1,5 @@
 (ns clojure-tryout.core
-  (:require [clojure-tryout.core :refer [fizzbuzz-number-naive-impl]]
-            [clojure.core.async :refer [<! >! chan go timeout]])
+  (:require [clojure.core.async :refer [<! >! chan go timeout]])
   (:gen-class))
 
 ;; It does this by getting the modulus of 15 then using this as the index for a
@@ -314,3 +313,6 @@
 
 
 
+(def a-map {:top {:middle {:bottom "Hello"} :value "middle"} :value "top"})
+;; pattern using thread first to extract values in nested maps without using get-in
+(-> a-map :top :middle :bottom)
