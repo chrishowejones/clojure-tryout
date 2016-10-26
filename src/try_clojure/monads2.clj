@@ -1,0 +1,67 @@
+(ns try-clojure.monads2)
+
+;; add state to value in return
+(defn return [v]
+  (fn [s] [v s]))
+
+(defn bind [a f]
+  (fn [s]
+    (let [[v ns] (a s)]
+      (if v
+        ((f v) ns)
+        ((return nil) ns)))))
+
+(defn m-inc [a]
+  (bind a (fn [v] (return (inc v)))))
+
+((return 5) 0) ;; unpack a return
+(bind (return 5) (fn [v] (return (inc v)))) ;; bind to execute a fn on an action and wrap it as an action again
+(m-inc (return 5)) ;; same as above in a monadic fn
+(m-inc (return 5)) ;; and again
+((m-inc (return 5)) 0) ;; this time extracting value
+
+
+;; not create a div monadic fn
+(defn m-div [a n]
+  (if (zero? n)
+    (bind a (fn [v] (return nil)))
+    (bind a (fn [v] (return (/ v n))))))
+
+(defn set-value
+  [v]
+  (fn [s] [v v]))
+
+(defn set-to-state [a]
+  (bind a (fn [v]
+            (set-value v))))
+
+(defn- add-from-state [a]
+  (bind a (fn [v]
+            (fn [s] [(+ v s) s]))))
+
+;; use m-div to divide by 2 and return new action
+(m-div (return 12) 2)
+
+;; unpack result - initial state 0
+((m-div (return 12) 2) 0)
+
+;; what happens if div by zero? - initial state 10
+((m-div (return 12) 0) 10)
+
+;; div by zero handled
+((-> (return 11)
+     m-inc
+     set-to-state
+     add-from-state
+     (m-div 0)
+     add-from-state
+     m-inc) 0)
+
+((-> (return 10)
+     (m-div 2)
+     set-to-state
+     add-from-state
+     m-inc
+     set-to-state
+     add-from-state
+     m-inc) 0)

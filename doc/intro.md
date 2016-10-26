@@ -1,3 +1,3 @@
-# Introduction to clojure-tryout
+# Introduction to try-clojure
 
 TODO: write [great documentation](http://jacobian.org/writing/what-to-write/)
