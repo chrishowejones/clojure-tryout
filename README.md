@@ -1,6 +1,6 @@
-# clojure-tryout
+# try-clojure
 
-FIXME: description
+A Clojure library designed to ... well, that part is up to you.
 
 ## Installation
 
@@ -10,7 +10,7 @@ Download from http://example.com/FIXME.
 
 FIXME: explanation
 
-    $ java -jar clojure-tryout-0.1.0-standalone.jar [args]
+    $ java -jar try-clojure-0.1.0-standalone.jar [args]
 
 ## Options
 
@@ -30,7 +30,7 @@ FIXME: listing of options this app accepts.
 
 ## License
 
-Copyright © 2015 FIXME
+Copyright © 2016 Chris Howe-Jones
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
