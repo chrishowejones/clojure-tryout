@@ -129,6 +129,18 @@
 (contains? #{1 2 3 4} 3)
 ;; => true
 
+(contains? #{1 2 3 5} 4)
+;; => false
+
+(contains? [3 3 3] 3)
+;; => false
+
+(contains? ["yes" "yes" "yes"] "yes")
+;; => false
+
+(contains? ["zero" "zero" "zero"] 0)
+;; => true
+
 (some #{:a :b} [:c :f :a :b])
 
 (defn contains-in-vector? [x vec]
@@ -140,7 +152,7 @@
 (contains-in-vector? 1 [1 2 3])
 ;; => 1
 
-(re-seq #"fred" "This sentence contains fred once")
+(re-seq #"fred" "This sentence contains fred twice fred")
 
 (:a {:a 1 :b 2})
 ;; => 1
@@ -182,11 +194,12 @@
 (s/join (filter #(Character/isLetter %) "This has, some!$punctuation<>chars"))
 ;; => "Thishassomepunctuationchars"
 
-(map (fn [[s v]] (assoc {:f :read} :state s :value v)) [[:ok 123]])
-;; => ({:f :read, :state :ok, :value 123})
+(map (fn [[s v]] (assoc {:f :read} :state s :value v)) [[:ok 123] [:not-ok 456]])
+;; => ({:f :read, :state :ok, :value 123} {:f :read, :state :not-ok, :value 456})
 
 (def brown [0 1 2 3 4 5 6 7 8])
 (def blue (assoc brown 5 'beef))
+
 brown
 ;; => [0 1 2 3 4 5 6 7 8]
 
@@ -237,3 +250,52 @@ blue
 
 (clojure.set/rename [map3] {:a :ay :c :see})
 ;; => #{{:b 2, :ay 1, :see 3}}
+
+(def m {:a 1})
+
+(let [m2 {:a 2}]
+  (condp = (m2 :a)
+   1 (assoc m2 :b 2)
+   2 (assoc m2 :b 1)
+   (assoc m2 :b 0)))
+;; => {:a 2, :b 1}
+
+(apply hash-map (interleave [:a :b :c] (repeat 0)))
+;; => {:c 0, :b 0, :a 0}
+(reduce (fn [m k] (assoc m k 0)) {} [:a :b :c])
+;; => {:a 0, :b 0, :c 0}
+(mapcat (fn [k] [k 0]) [:a :b :c])
+;; => (:a 0 :b 0 :c 0)
+(find (zipmap [:a :b :c] (repeat 0)) :a)
+;; => [:a 0]
+(find {:a "fred" :b "jim"} :b)
+;; => [:b "jim"]
+
+(let [my-map (zipmap [:a :b :c :d] (range 3))]
+  (as-> (:b my-map) b-value
+    (inc b-value)
+    (* 2 b-value)
+    (assoc my-map :b b-value))) ;; => {:a 0, :b 4, :c 2}
+
+ (map (fn [input]
+       (let [reverser
+             (if (string? input)
+               (comp (partial apply str) reverse)
+               reverse)]
+         (= input (reverser input)))) [[1 2 1] [1 2 3] "abba"])
+
+(defn my-fn [x]
+  (println "This is the value of x=" x))
+
+(my-fn 1)
+
+(into-array ["a" "b"])
+;; => #object["[Ljava.lang.String;" 0x740dfede "[Ljava.lang.String;@740dfede"]
+
+(defn a-var-arg [& args]
+  (type args))
+
+(a-var-arg "a" "b" "c") ;; => clojure.lang.ArraySeq
+
+(java.text.MessageFormat/format "Hello {0}" (into-array ["Chris"]))
+;; => "Hello Chris"
