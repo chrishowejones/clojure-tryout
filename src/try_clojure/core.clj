@@ -6,7 +6,7 @@
 
 (def nested2 [[9] 10 11 [12 [13 14]]])
 
-(flatten nested)
+(apply str (flatten nested))
 
 {:a "value"}
 #{"hello" "world" 1 2.33949}
