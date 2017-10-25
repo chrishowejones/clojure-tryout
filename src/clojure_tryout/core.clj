@@ -15,7 +15,7 @@
     (= 0 (mod n 15)) "FizzBuzz"
     (= 0 (mod n 5))  "Buzz"
     (= 0 (mod n 3))  "Fizz"
-    :else            (str n)))
+    :else (str n)))
 
 (defn fizzbuzz-naive [s]
   (map fizzbuzz-number-naive s))
@@ -310,7 +310,6 @@
     (= (class a) java.lang.Long) (str a)
     (= (class a) java.lang.Double) (str a)
     :else (throw (Exception. "Fell through"))))
-
 
 
 (def a-map {:top {:middle {:bottom "Hello"} :value "middle"} :value "top"})

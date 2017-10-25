@@ -12,11 +12,16 @@
 (defn m-inc [a]
   (bind a (fn [v] (return (inc v)))))
 
-((return 5)) ;; unpack a return
-(bind (return 5) (fn [v] (return (inc v)))) ;; bind to execute a fn on an action and wrap it as an action again
-(m-inc (return 5)) ;; same as above in a monadic fn
-(m-inc (return 5)) ;; and again
-((m-inc (return 5))) ;; this time extracting value
+;; unpack a return
+((return 5))
+ ;; bind to execute a fn on an action and wrap it as an action again
+(bind (return 5) (fn [v] (return (inc v))))
+ ;; same as above in a monadic fn
+(m-inc (return 5))
+ ;; and again
+(m-inc (return 5))
+ ;; this time extracting value
+((m-inc (return 5)))
 
 
 ;; not create a div monadic fn
@@ -27,7 +32,6 @@
 
 ;; use m-div to divide by 2 and return new action
 (m-div (return 12) 2)
-;; => #function[try-clojure.monads/return/fn--742449]
 
 ;; unpack result
 ((m-div (return 12) 2))

@@ -1,6 +1,7 @@
 (ns try-clojure.core
   (require [clojure.core.match :as m])
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            [clojure.string :as str]))
 
 (def nested [[1 2] 3 [4 [5 6 ] [7 8]]])
 
@@ -59,7 +60,7 @@
 ;; => (16 64)
 
 (def double-sqr-iter (eduction double-sqr numbers))
-(reduce + double-sqr-iter)
+;;(reduce + double-sqr-iter)
 ;; => 40
 (sequence double-sqr-iter)
 ;; => (8 32)
@@ -152,7 +153,8 @@
 (contains-in-vector? 1 [1 2 3])
 ;; => 1
 
-(re-seq #"fred" "This sentence contains fred twice fred")
+
+
 
 (:a {:a 1 :b 2})
 ;; => 1
@@ -180,6 +182,7 @@
 (letfn [(map-with-default [k] (my-map k :none))]
   (vector (map-with-default :a)
           (map-with-default :d)))
+
 ;; => [1 :none]
 
 (let [value 10
@@ -240,7 +243,8 @@ blue
 ((juxt :a #(get-in % [:c :e])) map4)
 ;; => [1 5]
 
-(select-keys map3 [:a :c]);; => {:a 1, :c 3}
+(select-keys map3 [:a :c])
+;; => {:a 1, :c 3}
 
 (map map3 [:a :c])
 ;; => (1 3)
@@ -277,17 +281,12 @@ blue
     (* 2 b-value)
     (assoc my-map :b b-value))) ;; => {:a 0, :b 4, :c 2}
 
- (map (fn [input]
-       (let [reverser
-             (if (string? input)
-               (comp (partial apply str) reverse)
-               reverse)]
-         (= input (reverser input)))) [[1 2 1] [1 2 3] "abba"])
-
-(defn my-fn [x]
-  (println "This is the value of x=" x))
-
-(my-fn 1)
+(map (fn [input]
+        (let [reverser
+              (if (string? input)
+                (comp (partial apply str) reverse)
+                reverse)]
+          (= input (reverser input)))) [[1 2 1] [1 2 3] "abba"])
 
 (into-array ["a" "b"])
 ;; => #object["[Ljava.lang.String;" 0x740dfede "[Ljava.lang.String;@740dfede"]
@@ -299,3 +298,111 @@ blue
 
 (java.text.MessageFormat/format "Hello {0}" (into-array ["Chris"]))
 ;; => "Hello Chris"
+
+(defn my-fn
+  "This is my function"
+  [n]
+  (repeat n "x"))
+
+(my-fn 10)
+;; => ("x" "x" "x" "x" "x" "x" "x" "x" "x" "x")
+
+#_(def numbers (repeatedly))
+
+(defn factorial [n]
+  (apply * (range 1 (inc n))))
+
+(defn fibonacci [n]
+  (first (drop n (map first (iterate (fn [[a b]] [b (+ a b)]) [0 1])))))
+
+(fibonacci 10)
+
+(defn fibonacci2 [n]
+  (cond
+    (< n 1) 0
+    (= n 1) 1
+    :else (+ (fibonacci2 (- n 2)) (fibonacci2 (dec n)))))
+
+(fibonacci2 6)
+(fibonacci 6 )
+
+(def key-order
+  [:c :d :e :a :f])
+
+(defn reorder-entry
+  [key-order]
+  (fn [x]
+    (reduce (fn [acc key] (assoc acc key (key x))) {} key-order)))
+
+(def maps
+  [{:a "1" :c 2 :d 3 :e 4 :f 5}
+   {:a "11" :c 12 :d 13 :e 14 :f 15}
+   {:a "21" :c 22 :d 23 :e 24 :f 25}])
+
+(defn reorder-maps
+  [m]
+  (let [reorder-fn (reorder-entry key-order)]
+    (map reorder-fn m)))
+
+(reorder-maps maps)
+
+(defrecord OrderedColumns
+    [c d e a f])
+
+(defn create-ordered-columns
+  [conversion-mapping]
+  (fn [x]
+    (let [convertor (fn [m k v]
+                      (if-let [conversion-fn (k conversion-mapping)]
+                        (assoc m k (conversion-fn v))
+                        (assoc m k v)))]
+      (map->OrderedColumns (reduce-kv convertor {} x)))))
+
+(def conv-mapping
+  {:a #(Double/parseDouble %)})
+
+(map (create-ordered-columns conv-mapping) maps)
+;; => (#try_clojure.core.OrderedColumns{:c 2, :d 3, :e 4, :a 1.0, :f 5} #try_clojure.core.OrderedColumns{:c 12, :d 13, :e 14, :a 11.0, :f 15} #try_clojure.core.OrderedColumns{:c 22, :d 23, :e 24, :a 21.0, :f 25})
+
+(defn convert-using-array-map
+  [col-conversion-mapping]
+  (fn [x]
+    (apply array-map (mapcat (fn [[k f]] [k (f (k x))]) col-conversion-mapping))))
+
+(def col-conv-mapping
+  [[:c identity]
+   [:d identity]
+   [:e identity]
+   [:a #(Double/parseDouble %)]
+   [:f identity]])
+
+(map (convert-using-array-map col-conv-mapping) maps)
+
+(map map->OrderedColumns maps)
+;; => (#try_clojure.core.OrderedColumns{:c 2, :d 3, :e 4, :a 1, :f 5} #try_clojure.core.OrderedColumns{:c 12, :d 13, :e 14, :a 11, :f 15} #try_clojure.core.OrderedColumns{:c 22, :d 23, :e 24, :a 21, :f 25})
+
+
+(comment
+
+  (def ^:dynamic *my-assert-enabled* false)
+
+  (defmacro my-assert [f?]
+    `(let [pred-res# ~(eval f?)]
+       (if (and *my-assert-enabled*
+                (not pred-res#))
+         (throw  (ex-info
+                  (format "My assert failed- returned %s" pred-res#)
+                  {}))
+         pred-res#)))
+
+  (with-local-vars [*my-assert-enabled* false]
+    *my-assert-enabled*)
+
+
+  (my-assert (< 2 2))
+
+  (binding [*my-assert-enabled* true]
+    (my-assert (< 2 2)))
+
+
+  )
